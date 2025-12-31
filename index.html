@@ -2,787 +2,681 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fast Bubble Shooter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart to Star</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            touch-action: manipulation;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: white;
-            overflow: hidden;
-            height: 100vh;
+            background-color: #000;
+            color: #fff;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 10px;
+            overflow-x: hidden;
+            padding: 15px;
+            -webkit-tap-highlight-color: transparent;
         }
         
-        .screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        .container {
             width: 100%;
             max-width: 500px;
-            height: 90vh;
-        }
-        
-        #startScreen {
             text-align: center;
-        }
-        
-        #gameScreen {
-            display: none;
-        }
-        
-        #gameOverScreen {
-            display: none;
-            text-align: center;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            color: #4cc9f0;
-            margin-bottom: 20px;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-        }
-        
-        h2 {
-            font-size: 2rem;
-            color: #f72585;
-            margin-bottom: 15px;
-        }
-        
-        p {
-            font-size: 1.1rem;
-            color: #b8c1ec;
-            margin-bottom: 25px;
-            max-width: 400px;
-            line-height: 1.5;
-        }
-        
-        .game-container {
-            width: 100%;
-            height: 80vh;
-            max-height: 600px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            overflow: hidden;
+            padding: 20px 15px;
             position: relative;
-            border: 3px solid #4361ee;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
         }
         
-        #gameCanvas {
-            width: 100%;
+        /* Heart styling - centered vertically */
+        .heart-container {
+            margin: 0 auto;
+            position: relative;
             height: 100%;
-            display: block;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
-        .score-board {
+        .heart {
+            color: #ff69b4;
+            font-size: 90px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            animation: heartbeat 1.2s infinite alternate;
+            transition: all 0.8s ease;
             position: absolute;
-            top: 15px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-            font-size: 1.3rem;
-            font-weight: bold;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 10;
         }
         
-        .score-item {
-            background: rgba(0, 0, 0, 0.6);
-            padding: 8px 15px;
-            border-radius: 20px;
-            color: #ffd166;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+        .heart:active {
+            transform: translate(-50%, -50%) scale(1.1);
         }
         
-        .gun {
+        .heart.clicked {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.1);
+            pointer-events: none;
+        }
+        
+        /* Star styling */
+        .star-container {
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 1s ease;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .star-container.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .main-star {
+            color: gold;
+            font-size: 100px;
+            text-shadow: 
+                0 0 20px gold,
+                0 0 40px rgba(255, 215, 0, 0.7),
+                0 0 60px rgba(255, 215, 0, 0.5);
+            animation: starGlow 2s infinite alternate, spin 8s linear infinite;
+            position: relative;
+        }
+        
+        /* Small stars around main star */
+        .mini-star {
+            position: absolute;
+            color: #ffcc00;
+            font-size: 20px;
+            animation: twinkle 3s infinite alternate;
+        }
+        
+        .mini-star-1 {
+            top: -30px;
+            left: 30px;
+            animation-delay: 0s;
+        }
+        
+        .mini-star-2 {
+            top: 10px;
+            left: -50px;
+            animation-delay: 0.5s;
+        }
+        
+        .mini-star-3 {
+            top: 10px;
+            right: -50px;
+            animation-delay: 1s;
+        }
+        
+        .mini-star-4 {
+            bottom: -30px;
+            left: 10px;
+            animation-delay: 1.5s;
+        }
+        
+        .mini-star-5 {
+            bottom: -10px;
+            right: 20px;
+            animation-delay: 2s;
+        }
+        
+        /* Signature - subtle but visible */
+        .signature {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+            font-style: italic;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            z-index: 5;
+            pointer-events: none;
+        }
+        
+        .signature.show {
+            opacity: 0.6;
+        }
+        
+        .signature:hover {
+            opacity: 0.8;
+        }
+        
+        /* Messages styling - optimized for mobile */
+        .messages {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-top: 40px;
+            width: 100%;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        
+        .message-box {
+            background-color: rgba(20, 20, 20, 0.95);
+            border-radius: 12px;
+            padding: 18px;
+            text-align: left;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 105, 180, 0.3);
+            transition: transform 0.3s ease;
+            opacity: 0;
+        }
+        
+        .message-box h3 {
+            color: #ff69b4;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+            border-bottom: 1px solid rgba(255, 105, 180, 0.3);
+            padding-bottom: 6px;
+        }
+        
+        .message-box p {
+            line-height: 1.5;
+            font-size: 1rem;
+            color: #e0e0e0;
+        }
+        
+        .timer {
+            color: #ffcc00;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 8px;
+            padding: 8px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 6px;
+            font-family: monospace;
+            text-align: center;
+            border: 1px solid rgba(255, 204, 0, 0.3);
+            word-break: break-word;
+        }
+        
+        /* Cloud-shaped message containers */
+        .cloud-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin: 25px auto 0;
+            gap: 20px;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        
+        .cloud-message {
+            position: relative;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 40px;
+            padding: 20px 25px;
+            color: #222;
+            font-size: 1rem;
+            line-height: 1.5;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+        
+        /* Cloud shape using pseudo-elements */
+        .cloud-message:before,
+        .cloud-message:after {
+            content: '';
+            position: absolute;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            z-index: -1;
+        }
+        
+        .cloud-message:before {
+            width: 35px;
+            height: 35px;
+            top: -12px;
+            left: 25px;
+        }
+        
+        .cloud-message:after {
+            width: 25px;
+            height: 25px;
+            top: -8px;
+            right: 35px;
+        }
+        
+        .instruction {
+            color: #ff69b4;
+            font-size: 1.3rem;
+            margin-top: 15px;
+            text-align: center;
+            transition: opacity 0.5s ease;
+            padding: 0 10px;
             position: absolute;
             bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 40px;
-            background: #4cc9f0;
-            border-radius: 10px 10px 0 0;
-            z-index: 5;
-            cursor: grab;
-            user-select: none;
-            box-shadow: 0 0 10px rgba(76, 201, 240, 0.7);
-        }
-        
-        .gun:active {
-            cursor: grabbing;
-        }
-        
-        .gun-barrel {
-            position: absolute;
-            top: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 10px;
-            height: 30px;
-            background: #3a86ff;
-            border-radius: 5px;
-        }
-        
-        .btn {
-            padding: 15px 40px;
-            border: none;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            margin-top: 20px;
-            background: linear-gradient(to right, #4361ee, #3a0ca3);
-            color: white;
-            min-width: 180px;
-        }
-        
-        .btn:hover, .btn:active {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
-            background: linear-gradient(to right, #3a0ca3, #4361ee);
-        }
-        
-        .btn:active {
-            transform: translateY(-1px);
-        }
-        
-        .controls-info {
-            margin-top: 20px;
-            font-size: 1rem;
-            color: #b8c1ec;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 10px 20px;
-            border-radius: 10px;
-            max-width: 400px;
-        }
-        
-        .game-over-score {
-            font-size: 2.5rem;
-            color: #ffd166;
-            margin: 20px 0;
-            text-shadow: 0 0 10px rgba(255, 209, 102, 0.7);
-        }
-        
-        .speed-warning {
-            position: absolute;
-            bottom: 70px;
-            left: 0;
             width: 100%;
-            text-align: center;
-            font-size: 1rem;
-            color: #ff9e00;
-            z-index: 10;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 5px;
-            display: none;
+            left: 0;
         }
         
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 2rem;
+        .instruction.fade {
+            opacity: 0;
+        }
+        
+        /* Sparkle effect */
+        .sparkle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* Animations optimized for mobile */
+        @keyframes heartbeat {
+            from { transform: translate(-50%, -50%) scale(1); }
+            to { transform: translate(-50%, -50%) scale(1.08); }
+        }
+        
+        @keyframes starGlow {
+            0%, 100% { 
+                text-shadow: 
+                    0 0 20px gold,
+                    0 0 40px rgba(255, 215, 0, 0.7),
+                    0 0 60px rgba(255, 215, 0, 0.5);
             }
-            
-            h2 {
-                font-size: 1.7rem;
-            }
-            
-            .game-container {
-                height: 70vh;
-            }
-            
-            .score-board {
-                font-size: 1.1rem;
-                padding: 0 15px;
-            }
-            
-            .btn {
-                padding: 12px 30px;
-                font-size: 1.1rem;
-                min-width: 160px;
-            }
-            
-            .gun {
-                width: 50px;
-                height: 35px;
+            50% { 
+                text-shadow: 
+                    0 0 30px gold,
+                    0 0 60px rgba(255, 215, 0, 0.8),
+                    0 0 90px rgba(255, 215, 0, 0.6),
+                    0 0 120px rgba(255, 215, 0, 0.4);
             }
         }
         
-        @media (max-width: 400px) {
-            h1 {
-                font-size: 1.8rem;
+        @keyframes twinkle {
+            0%, 100% { 
+                opacity: 0.5;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes cloudFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        
+        @keyframes sparkleAnimation {
+            0% {
+                transform: translate(0, 0) scale(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+                transform: translate(var(--tx), var(--ty)) scale(1);
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0);
+                opacity: 0;
+            }
+        }
+        
+        /* Touch device optimizations */
+        @media (hover: hover) {
+            .heart:hover {
+                transform: translate(-50%, -50%) scale(1.1);
+                text-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
             }
             
-            h2 {
+            .message-box:hover {
+                transform: translateY(-5px);
+                border-color: rgba(255, 105, 180, 0.7);
+            }
+            
+            .cloud-message:hover {
+                transform: translateY(-5px) scale(1.02);
+                box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+            }
+        }
+        
+        /* Larger screen adjustments */
+        @media (min-width: 768px) {
+            .container {
+                max-width: 700px;
+                padding: 30px 20px;
+            }
+            
+            .heart {
+                font-size: 120px;
+            }
+            
+            .main-star {
+                font-size: 130px;
+            }
+            
+            .messages {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .cloud-container {
+                flex-direction: row;
+            }
+            
+            .instruction {
                 font-size: 1.5rem;
+                bottom: 30px;
             }
             
-            .btn {
-                padding: 10px 25px;
-                font-size: 1rem;
-                min-width: 140px;
+            .mini-star {
+                font-size: 25px;
             }
             
-            .score-board {
-                font-size: 1rem;
-                padding: 0 10px;
+            .signature {
+                bottom: 20px;
+                right: 20px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Landscape mode optimization */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .container {
+                padding: 10px;
+            }
+            
+            .heart-container {
+                min-height: 150px;
+            }
+            
+            .heart {
+                font-size: 70px;
+            }
+            
+            .main-star {
+                font-size: 80px;
+            }
+            
+            .messages {
+                margin-top: 20px;
+            }
+            
+            .cloud-container {
+                margin-top: 15px;
+            }
+            
+            .instruction {
+                bottom: 10px;
+                font-size: 1.1rem;
+            }
+            
+            .signature {
+                bottom: 8px;
+                right: 8px;
+                font-size: 0.8rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Start Screen -->
-    <div class="screen" id="startScreen">
-        <h1>Fast Bubble Shooter</h1>
-        <p>Drag the gun to shoot falling bubbles. Score 20 points per bubble. Speed increases every 7 seconds! Can you survive the rapid speed increase?</p>
-        <button class="btn" id="startBtn">START GAME</button>
-        <div class="controls-info">
-            <p>Drag the blue gun at the bottom to move it left and right</p>
+    <div class="container">
+        <div class="heart-container">
+            <div class="heart" id="heart">
+                <i class="fas fa-heart"></i>
+            </div>
+            
+            <div class="star-container" id="starContainer">
+                <div class="main-star">★</div>
+                <div class="mini-star mini-star-1">✦</div>
+                <div class="mini-star mini-star-2">✦</div>
+                <div class="mini-star mini-star-3">✦</div>
+                <div class="mini-star mini-star-4">✦</div>
+                <div class="mini-star mini-star-5">✦</div>
+            </div>
+        </div>
+        
+        <p class="instruction" id="instruction">Click the Heart</p>
+        
+        <div class="messages" id="messages">
+            <div class="message-box" id="topLeft">
+                <h3>Happy New Year, Sanvi</h3>
+                <p>Wishing you a year filled with joy, prosperity, and success. May all your dreams come true!</p>
+            </div>
+            
+            <div class="message-box" id="topRight">
+                <h3>Time Since We Last Met</h3>
+                <p>I know we haven't met since:</p>
+                <div class="timer" id="timer">27th April 2025 at 6:30 PM</div>
+            </div>
+        </div>
+        
+        <div class="cloud-container" id="cloudContainer">
+            <div class="cloud-message" id="leftCloud">
+                May we get success this year in all our endeavors. Let's work hard and achieve our goals together!
+            </div>
+            
+            <div class="cloud-message" id="rightCloud">
+                We'll meet soon! Looking forward to the day when we can catch up in person and create wonderful memories.
+            </div>
         </div>
     </div>
     
-    <!-- Game Screen -->
-    <div class="screen" id="gameScreen">
-        <div class="game-container">
-            <div class="score-board">
-                <div class="score-item">SCORE: <span id="score">0</span></div>
-                <div class="score-item">SPEED: <span id="speedLevel">1</span>x</div>
-                <div class="score-item">TIME: <span id="time">7</span>s</div>
-            </div>
-            
-            <canvas id="gameCanvas"></canvas>
-            
-            <div class="speed-warning" id="speedWarning"></div>
-            
-            <div class="gun" id="gun">
-                <div class="gun-barrel"></div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Game Over Screen -->
-    <div class="screen" id="gameOverScreen">
-        <h2>GAME OVER</h2>
-        <p>Bubbles reached the bottom!</p>
-        <div class="game-over-score">Score: <span id="finalScore">0</span></div>
-        <div class="controls-info" style="margin-top: 10px;">
-            <p>Final Speed Level: <span id="finalSpeedLevel">1</span>x</p>
-        </div>
-        <button class="btn" id="restartBtn">PLAY AGAIN</button>
-    </div>
+    <!-- Signature - only visible in second interface -->
+    <div class="signature" id="signature">- Your Friend Avi</div>
 
     <script>
-        // Game elements
-        const startScreen = document.getElementById('startScreen');
-        const gameScreen = document.getElementById('gameScreen');
-        const gameOverScreen = document.getElementById('gameOverScreen');
-        const startBtn = document.getElementById('startBtn');
-        const restartBtn = document.getElementById('restartBtn');
-        const scoreElement = document.getElementById('score');
-        const speedLevelElement = document.getElementById('speedLevel');
-        const timeElement = document.getElementById('time');
-        const finalScoreElement = document.getElementById('finalScore');
-        const finalSpeedLevelElement = document.getElementById('finalSpeedLevel');
-        const speedWarningElement = document.getElementById('speedWarning');
-        const gunElement = document.getElementById('gun');
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Game variables
-        let score = 0;
-        let speedIncreaseTimer = 7; // Changed to 7 seconds
-        let speedLevel = 1;
-        let gameActive = false;
-        let gameLoopId;
-        let speedTimerId;
-        let gunX = 0;
-        let isDragging = false;
-        let flashEffect = false;
-        let flashCounter = 0;
-        
-        // Speed configuration - Adjusted for faster pace
-        const BASE_SPEED = 1.0;
-        const SPEED_INCREASE_RATE = 0.3; // Smaller increase but more frequent
-        const SPEED_INTERVAL = 7; // Speed increases every 7 seconds
-        const MAX_BUBBLES = 15; // Maximum bubbles on screen
-        
-        // Arrays for game objects
-        let bullets = [];
-        let bubbles = [];
-        
-        // Set canvas size
-        function resizeCanvas() {
-            const container = canvas.parentElement;
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-        }
-        
-        // Initialize game
-        function initGame() {
-            resizeCanvas();
+        document.addEventListener('DOMContentLoaded', function() {
+            const heart = document.getElementById('heart');
+            const starContainer = document.getElementById('starContainer');
+            const instruction = document.getElementById('instruction');
+            const messages = document.getElementById('messages');
+            const cloudContainer = document.getElementById('cloudContainer');
+            const timerElement = document.getElementById('timer');
+            const signature = document.getElementById('signature');
             
-            // Set initial gun position
-            gunX = canvas.width / 2;
-            updateGunPosition();
+            // Set the countdown timer from 27th April 2025 at 6:30 PM
+            const countDownDate = new Date("April 27, 2025 18:30:00").getTime();
             
-            // Reset game state
-            score = 0;
-            speedIncreaseTimer = SPEED_INTERVAL;
-            speedLevel = 1;
-            bullets = [];
-            bubbles = [];
-            flashEffect = false;
+            // Update timer every second
+            function updateTimer() {
+                const now = new Date().getTime();
+                const distance = now - countDownDate;
+                
+                // Calculate time units
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                // Display the result
+                timerElement.innerHTML = `${days} days, ${hours}h ${minutes}m ${seconds}s`;
+            }
             
-            // Clear any warnings
-            speedWarningElement.textContent = '';
-            speedWarningElement.style.display = 'none';
+            // Initial call to display timer immediately
+            updateTimer();
             
-            // Update UI
-            scoreElement.textContent = score;
-            speedLevelElement.textContent = speedLevel;
-            timeElement.textContent = speedIncreaseTimer;
+            // Update timer every second
+            const timerInterval = setInterval(updateTimer, 1000);
             
-            // Create initial bubbles
-            createBubble();
-            createBubble();
-        }
-        
-        // Start game
-        function startGame() {
-            startScreen.style.display = 'none';
-            gameScreen.style.display = 'flex';
-            gameOverScreen.style.display = 'none';
-            
-            initGame();
-            gameActive = true;
-            
-            // Start game loop
-            gameLoopId = requestAnimationFrame(gameLoop);
-            
-            // Start speed timer
-            speedTimerId = setInterval(() => {
-                if (gameActive) {
-                    speedIncreaseTimer--;
-                    timeElement.textContent = speedIncreaseTimer;
-                    
-                    // Flash warning when 3 seconds remaining
-                    if (speedIncreaseTimer <= 3 && speedIncreaseTimer > 0) {
-                        speedWarningElement.textContent = `Speed increase in ${speedIncreaseTimer}...`;
-                        speedWarningElement.style.display = 'block';
-                        speedWarningElement.style.color = '#ff9e00';
-                    }
-                    
-                    if (speedIncreaseTimer <= 0) {
-                        increaseSpeed();
-                        speedIncreaseTimer = SPEED_INTERVAL; // Reset timer
-                    }
-                }
-            }, 1000);
-            
-            // Setup gun dragging
-            setupGunDrag();
-        }
-        
-        // Increase ball speed
-        function increaseSpeed() {
-            speedLevel++;
-            speedLevelElement.textContent = speedLevel;
-            
-            // Update speed for existing bubbles
-            bubbles.forEach(bubble => {
-                bubble.speed += SPEED_INCREASE_RATE;
+            // Heart click/tap event
+            heart.addEventListener('click', function() {
+                handleHeartClick();
             });
             
-            // Show speed increase notification
-            speedWarningElement.textContent = `SPEED INCREASED! Level ${speedLevel}`;
-            speedWarningElement.style.color = '#f72585';
-            speedWarningElement.style.display = 'block';
-            
-            // Activate flash effect
-            flashEffect = true;
-            flashCounter = 0;
-            
-            // Hide notification after 1.5 seconds
-            setTimeout(() => {
-                speedWarningElement.style.display = 'none';
-            }, 1500);
-            
-            // Add more bubbles as speed increases (more aggressive)
-            const newBubblesToAdd = Math.min(2 + Math.floor(speedLevel / 3), 5);
-            for (let i = 0; i < newBubblesToAdd; i++) {
-                if (bubbles.length < MAX_BUBBLES) {
-                    createBubble();
-                }
-            }
-        }
-        
-        // Setup gun dragging
-        function setupGunDrag() {
-            let startX = 0;
-            let gunStartX = 0;
-            
-            // Mouse events
-            gunElement.addEventListener('mousedown', startDrag);
-            document.addEventListener('mousemove', drag);
-            document.addEventListener('mouseup', stopDrag);
-            
-            // Touch events for mobile
-            gunElement.addEventListener('touchstart', (e) => {
+            // Touch event for better mobile response
+            heart.addEventListener('touchstart', function(e) {
                 e.preventDefault();
-                startDrag(e.touches[0]);
+                this.style.transform = 'translate(-50%, -50%) scale(1.1)';
             });
-            document.addEventListener('touchmove', (e) => {
+            
+            heart.addEventListener('touchend', function(e) {
                 e.preventDefault();
-                if (e.touches.length === 1) {
-                    drag(e.touches[0]);
-                }
+                this.style.transform = 'translate(-50%, -50%) scale(1)';
+                handleHeartClick();
             });
-            document.addEventListener('touchend', stopDrag);
             
-            function startDrag(e) {
-                isDragging = true;
-                startX = e.clientX;
-                gunStartX = gunX;
-                gunElement.style.cursor = 'grabbing';
-            }
-            
-            function drag(e) {
-                if (!isDragging || !gameActive) return;
+            function handleHeartClick() {
+                // Add clicked class to heart
+                heart.classList.add('clicked');
                 
-                const currentX = e.clientX;
-                const deltaX = currentX - startX;
+                // Fade out instruction
+                instruction.classList.add('fade');
                 
-                // Calculate new gun position
-                let newX = gunStartX + deltaX;
+                // Show star after a short delay
+                setTimeout(() => {
+                    starContainer.classList.add('show');
+                }, 300);
                 
-                // Keep gun within canvas bounds
-                const gunWidth = gunElement.offsetWidth;
-                newX = Math.max(gunWidth/2, Math.min(canvas.width - gunWidth/2, newX));
-                
-                gunX = newX;
-                updateGunPosition();
-                
-                // Shoot automatically while dragging
-                shoot();
-            }
-            
-            function stopDrag() {
-                isDragging = false;
-                gunElement.style.cursor = 'grab';
-            }
-        }
-        
-        // Update gun position on screen
-        function updateGunPosition() {
-            gunElement.style.left = `${gunX - gunElement.offsetWidth/2}px`;
-        }
-        
-        // Create a new bubble
-        function createBubble() {
-            if (bubbles.length >= MAX_BUBBLES) return;
-            
-            const radius = 12 + Math.random() * 8; // Smaller size: 12-20px
-            const currentBaseSpeed = BASE_SPEED + (speedLevel - 1) * SPEED_INCREASE_RATE;
-            const speed = currentBaseSpeed + Math.random() * 0.3;
-            
-            bubbles.push({
-                x: Math.random() * (canvas.width - radius * 2) + radius,
-                y: -radius,
-                radius: radius,
-                speed: speed,
-                color: getRandomColor()
-            });
-        }
-        
-        // Get random color for bubbles
-        function getRandomColor() {
-            const colors = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'];
-            return colors[Math.floor(Math.random() * colors.length)];
-        }
-        
-        // Shoot a bullet
-        function shoot() {
-            if (!gameActive) return;
-            
-            bullets.push({
-                x: gunX,
-                y: canvas.height - 50,
-                radius: 5,
-                speed: 8,
-                color: '#ffd166'
-            });
-        }
-        
-        // Update game state
-        function update() {
-            if (!gameActive) return;
-            
-            // Update bullets
-            for (let i = bullets.length - 1; i >= 0; i--) {
-                const bullet = bullets[i];
-                bullet.y -= bullet.speed;
-                
-                // Remove bullets that go off screen
-                if (bullet.y < -bullet.radius) {
-                    bullets.splice(i, 1);
-                    continue;
-                }
-                
-                // Check collision with bubbles
-                for (let j = bubbles.length - 1; j >= 0; j--) {
-                    const bubble = bubbles[j];
-                    const dx = bullet.x - bubble.x;
-                    const dy = bullet.y - bubble.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
+                // Show messages after star appears
+                setTimeout(() => {
+                    messages.style.opacity = '1';
+                    cloudContainer.style.opacity = '1';
                     
-                    if (distance < bullet.radius + bubble.radius) {
-                        // Collision detected
-                        bullets.splice(i, 1);
-                        bubbles.splice(j, 1);
-                        
-                        // Increase score by 20 points
-                        score += 20;
-                        scoreElement.textContent = score;
-                        
-                        // Create new bubble
-                        createBubble();
-                        break;
+                    // Show signature with delay
+                    setTimeout(() => {
+                        signature.classList.add('show');
+                    }, 500);
+                    
+                    // Animate each message box sequentially
+                    const messageBoxes = document.querySelectorAll('.message-box');
+                    messageBoxes.forEach((box, index) => {
+                        box.style.animation = `fadeIn 0.8s ease ${index * 0.3}s forwards`;
+                    });
+                    
+                    // Animate cloud messages with float effect
+                    const cloudMessages = document.querySelectorAll('.cloud-message');
+                    cloudMessages.forEach((cloud, index) => {
+                        cloud.style.animation = `fadeIn 0.8s ease ${index * 0.4 + 0.6}s forwards, cloudFloat 4s ease-in-out ${index * 0.5 + 1}s infinite`;
+                    });
+                }, 1000);
+                
+                // Create sparkle effect
+                createSparkles();
+            }
+            
+            // Create sparkle effect around the star
+            function createSparkles() {
+                const sparkleContainer = document.createElement('div');
+                sparkleContainer.style.position = 'fixed';
+                sparkleContainer.style.top = '0';
+                sparkleContainer.style.left = '0';
+                sparkleContainer.style.width = '100%';
+                sparkleContainer.style.height = '100%';
+                sparkleContainer.style.pointerEvents = 'none';
+                sparkleContainer.style.zIndex = '1';
+                document.body.appendChild(sparkleContainer);
+                
+                // Create sparkles
+                const sparkleCount = 20;
+                
+                for (let i = 0; i < sparkleCount; i++) {
+                    const sparkle = document.createElement('div');
+                    sparkle.classList.add('sparkle');
+                    
+                    // Random properties
+                    const size = Math.random() * 6 + 2;
+                    const startX = 50 + (Math.random() * 40 - 20); // Around center
+                    const startY = 50 + (Math.random() * 40 - 20); // Around center
+                    const distance = Math.random() * 100 + 50;
+                    const angle = Math.random() * Math.PI * 2;
+                    
+                    const tx = Math.cos(angle) * distance;
+                    const ty = Math.sin(angle) * distance;
+                    
+                    const duration = Math.random() * 1 + 0.5;
+                    const delay = Math.random() * 1;
+                    
+                    sparkle.style.width = `${size}px`;
+                    sparkle.style.height = `${size}px`;
+                    sparkle.style.left = `${startX}%`;
+                    sparkle.style.top = `${startY}%`;
+                    sparkle.style.setProperty('--tx', `${tx}px`);
+                    sparkle.style.setProperty('--ty', `${ty}px`);
+                    sparkle.style.animation = `sparkleAnimation ${duration}s ease-out ${delay}s forwards`;
+                    sparkle.style.backgroundColor = i % 3 === 0 ? '#ff69b4' : (i % 3 === 1 ? 'gold' : '#ffffff');
+                    
+                    sparkleContainer.appendChild(sparkle);
+                    
+                    // Remove sparkle after animation completes
+                    setTimeout(() => {
+                        if (sparkle.parentNode) {
+                            sparkle.parentNode.removeChild(sparkle);
+                        }
+                    }, (duration + delay) * 1000);
+                }
+                
+                // Remove container after all sparkles are gone
+                setTimeout(() => {
+                    if (sparkleContainer.parentNode) {
+                        sparkleContainer.parentNode.removeChild(sparkleContainer);
                     }
-                }
+                }, 3000);
             }
             
-            // Update bubbles
-            for (let i = bubbles.length - 1; i >= 0; i--) {
-                const bubble = bubbles[i];
-                bubble.y += bubble.speed;
-                
-                // Check if bubble reached bottom
-                if (bubble.y > canvas.height - 10) {
-                    // Game over - bubble reached bottom
-                    gameOver();
-                    return;
-                }
+            // Add some subtle background stars (fewer for mobile)
+            const starCount = window.innerWidth < 768 ? 30 : 50;
+            for (let i = 0; i < starCount; i++) {
+                const bgStar = document.createElement('div');
+                bgStar.style.position = 'fixed';
+                bgStar.style.width = Math.random() * 2 + 'px';
+                bgStar.style.height = bgStar.style.width;
+                bgStar.style.backgroundColor = '#fff';
+                bgStar.style.borderRadius = '50%';
+                bgStar.style.left = Math.random() * 100 + 'vw';
+                bgStar.style.top = Math.random() * 100 + 'vh';
+                bgStar.style.opacity = Math.random() * 0.5 + 0.1;
+                bgStar.style.zIndex = '0';
+                bgStar.style.pointerEvents = 'none';
+                document.body.appendChild(bgStar);
             }
             
-            // More frequent bubble generation based on speed level
-            const spawnChance = 0.015 + (speedLevel * 0.005); // Increases with speed level
-            if (Math.random() < spawnChance && bubbles.length < MAX_BUBBLES) {
-                createBubble();
-            }
-            
-            // Update flash effect
-            if (flashEffect) {
-                flashCounter++;
-                if (flashCounter > 10) { // Flash lasts for 10 frames
-                    flashEffect = false;
-                }
-            }
-        }
-        
-        // Draw game objects
-        function draw() {
-            // Apply flash effect if active
-            if (flashEffect) {
-                const flashAlpha = 0.7 - (flashCounter * 0.07);
-                ctx.fillStyle = `rgba(247, 37, 133, ${flashAlpha})`;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            } else {
-                // Clear canvas with semi-transparent background for trail effect
-                ctx.fillStyle = 'rgba(26, 26, 46, 0.15)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
-            
-            // Draw speed indicator background
-            drawSpeedIndicator();
-            
-            // Draw bubbles
-            bubbles.forEach(bubble => {
-                // Draw bubble glow for faster bubbles
-                if (bubble.speed > BASE_SPEED + 2) {
-                    const glowRadius = bubble.radius + 3;
-                    const gradient = ctx.createRadialGradient(
-                        bubble.x, bubble.y, bubble.radius,
-                        bubble.x, bubble.y, glowRadius
-                    );
-                    gradient.addColorStop(0, bubble.color);
-                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                    
-                    ctx.beginPath();
-                    ctx.arc(bubble.x, bubble.y, glowRadius, 0, Math.PI * 2);
-                    ctx.fillStyle = gradient;
-                    ctx.fill();
-                }
-                
-                // Draw bubble
-                ctx.beginPath();
-                ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
-                ctx.fillStyle = bubble.color;
-                ctx.fill();
-                
-                // Bubble shine effect
-                ctx.beginPath();
-                ctx.arc(bubble.x - bubble.radius * 0.3, bubble.y - bubble.radius * 0.3, bubble.radius * 0.2, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                ctx.fill();
-                
-                // Bubble border
-                ctx.beginPath();
-                ctx.arc(bubble.x, bubble.y, bubble.radius, 0, Math.PI * 2);
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 1.5;
-                ctx.stroke();
+            // Handle orientation change
+            window.addEventListener('orientationchange', function() {
+                // Brief timeout to allow orientation to complete
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                }, 100);
             });
             
-            // Draw bullets
-            bullets.forEach(bullet => {
-                ctx.beginPath();
-                ctx.arc(bullet.x, bullet.y, bullet.radius, 0, Math.PI * 2);
-                ctx.fillStyle = bullet.color;
-                ctx.fill();
-                
-                // Bullet glow
-                const gradient = ctx.createRadialGradient(
-                    bullet.x, bullet.y, 0,
-                    bullet.x, bullet.y, bullet.radius * 3
-                );
-                gradient.addColorStop(0, 'rgba(255, 209, 102, 0.8)');
-                gradient.addColorStop(1, 'rgba(255, 209, 102, 0)');
-                
-                ctx.beginPath();
-                ctx.arc(bullet.x, bullet.y, bullet.radius * 3, 0, Math.PI * 2);
-                ctx.fillStyle = gradient;
-                ctx.fill();
-            });
+            // Prevent zoom on double-tap
+            document.addEventListener('touchstart', function(event) {
+                if (event.touches.length > 1) {
+                    event.preventDefault();
+                }
+            }, { passive: false });
             
-            // Draw bottom danger zone
-            drawDangerZone();
-        }
-        
-        // Draw speed indicator
-        function drawSpeedIndicator() {
-            // Draw speed level box
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(canvas.width/2 - 60, 10, 120, 40);
-            
-            // Draw speed level text
-            ctx.font = 'bold 18px Arial';
-            ctx.fillStyle = '#4cc9f0';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(`SPEED: ${speedLevel}x`, canvas.width/2, 25);
-            
-            // Draw timer text
-            ctx.font = '14px Arial';
-            ctx.fillStyle = speedIncreaseTimer <= 3 ? '#ff9e00' : '#ffd166';
-            ctx.fillText(`Next: ${speedIncreaseTimer}s`, canvas.width/2, 40);
-            
-            // Draw speed timer progress bar
-            const progressWidth = 120;
-            const progressHeight = 6;
-            const progressX = canvas.width/2 - progressWidth/2;
-            const progressY = 50;
-            
-            // Background
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
-            ctx.fillRect(progressX, progressY, progressWidth, progressHeight);
-            
-            // Progress
-            const progress = (SPEED_INTERVAL - speedIncreaseTimer) / SPEED_INTERVAL;
-            ctx.fillStyle = speedIncreaseTimer <= 3 ? '#ff9e00' : '#4cc9f0';
-            ctx.fillRect(progressX, progressY, progressWidth * progress, progressHeight);
-            
-            // Border
-            ctx.strokeStyle = 'white';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(progressX, progressY, progressWidth, progressHeight);
-        }
-        
-        // Draw danger zone
-        function drawDangerZone() {
-            ctx.beginPath();
-            ctx.moveTo(0, canvas.height - 10);
-            ctx.lineTo(canvas.width, canvas.height - 10);
-            
-            // Pulse effect for danger zone
-            const pulse = (Math.sin(Date.now() / 200) + 1) / 2;
-            const lineWidth = 3 + pulse * 2;
-            
-            ctx.strokeStyle = '#f72585';
-            ctx.lineWidth = lineWidth;
-            ctx.stroke();
-            
-            // Danger zone label
-            ctx.font = '12px Arial';
-            ctx.fillStyle = '#f72585';
-            ctx.textAlign = 'center';
-            ctx.fillText('DANGER ZONE', canvas.width/2, canvas.height - 20);
-        }
-        
-        // Game loop
-        function gameLoop() {
-            update();
-            draw();
-            
-            if (gameActive) {
-                gameLoopId = requestAnimationFrame(gameLoop);
-            }
-        }
-        
-        // Game over
-        function gameOver() {
-            gameActive = false;
-            clearInterval(speedTimerId);
-            cancelAnimationFrame(gameLoopId);
-            
-            // Show final score and speed level
-            finalScoreElement.textContent = score;
-            finalSpeedLevelElement.textContent = speedLevel;
-            
-            // Switch to game over screen
-            gameScreen.style.display = 'none';
-            gameOverScreen.style.display = 'flex';
-        }
-        
-        // Restart game
-        function restartGame() {
-            startGame();
-        }
-        
-        // Event listeners
-        startBtn.addEventListener('click', startGame);
-        restartBtn.addEventListener('click', restartGame);
-        
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (gameActive) {
-                resizeCanvas();
-                updateGunPosition();
-            }
-        });
-        
-        // Initialize on load
-        window.addEventListener('load', () => {
-            // Show start screen by default
-            startScreen.style.display = 'flex';
-            gameScreen.style.display = 'none';
-            gameOverScreen.style.display = 'none';
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
         });
     </script>
 </body>
